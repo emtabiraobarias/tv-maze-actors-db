@@ -3,3 +3,26 @@ Demonstration of data services engineering through creating REST API services fr
 
 ## What is this about?
 A Flask-Restx data service that allows a client to read and store information about actors/actresses, and allows the consumers to access the data through a REST API. The source data is retrieved from *TV Maze API* source URL [http://api.tvmaze.com/] with added functionalities that would require saving to an external (local) database.
+
+## Set up instructions
+### Setting up the VirtualEnv and install dependencies
+First you need to set up the python virtual environment using `pipenv` and install all the dependencies:
+```
+# create the virtual environment and activate it in your current shell
+pipenv shell
+
+# install all the dependencies found in Pipfile
+pipenv install
+
+# run the flask-restx application
+python app.py
+```
+A sqlite db named *tv-maze-actors.db* will be created under the `instance` direcotry. This will also run the web service on port 5000.
+
+## TODO checklist
+[] Add a new actor
+[] Retrieve an actor
+[] Delete an actor
+[] Update an actor
+[] Retrieve list of available actors
+[] Get statistics of existing actors
