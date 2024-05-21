@@ -20,7 +20,7 @@ python app.py
 A sqlite db named *tv-maze-actors.db* will be created under the `instance` direcotry. This will also run the web service on port 5000.
 
 ## TODO checklist
-[] Add a new actor
+[x] Add a new actor
 [] Retrieve an actor
 [] Delete an actor
 [] Update an actor
