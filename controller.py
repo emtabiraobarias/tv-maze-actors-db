@@ -1,5 +1,6 @@
 from flask_restx import Resource, Namespace
 from helper import TVMaze_API_Access
+from model import Actor
 
 ns_actor = Namespace('Actors', description='actor related operations')
 
@@ -11,6 +12,7 @@ actor_create_payload.add_argument('name', type=str, location='args', help='actor
 @ns_actor.route('/')
 class Actors(Resource):
     
+    @ns_actor.doc("Add an actor to database.")
     @ns_actor.expect(actor_create_payload)
     @ns_actor.response(201, 'Report created')
     @ns_actor.response(404, 'Actor not found')
@@ -29,4 +31,21 @@ class Actors(Resource):
             return 'Actor {} cannot be found.'.format(arg_name), 404
         else:
             actor.save_to_db()
-            return actor.json(), 201
+            return actor.created_json(), 201
+        
+
+@ns_actor.route('/<int:id>')
+class SingleActor(Resource):
+
+    @ns_actor.doc("Get a single actor.")
+    @ns_actor.response(404, 'Actor not found')
+    def get(self, id):
+        # get current actor
+        actor = Actor.find_by_id(id)
+        if actor is None:
+            return 'Actor {} does not exist.'.format(id), 404
+        # get previous actor
+        prev_actor = Actor.get_prev_id(id)
+        # get next actor
+        next_actor = Actor.get_next_id(id)
+        return actor.get_json(prev_actor=prev_actor, next_actor=next_actor), 200

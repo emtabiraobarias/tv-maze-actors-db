@@ -42,7 +42,7 @@ class Actor(db.Model):
         self.birthday = birthday
         self.deathday = deathday
         
-    def json(self):
+    def created_json(self):
         return {
             'id': self.id, 
             'last-update': str(self.last_update), 
@@ -51,6 +51,29 @@ class Actor(db.Model):
                     'href': 'http://' + request.host + '/db/actors/' + str(self.id)
                 } 
             }
+        }
+    
+    def get_json(self, prev_actor, next_actor):
+        return {
+            'id': self.id, 
+            'last_update':self.last_update.strftime('%m-%d-%Y %H:%M:%S'), 
+            'name': self.name,
+            'country': None if not self.country else self.country,
+            'gender': None if not self.gender else self.gender,
+            'birthday': None if not self.birthday else self.birthday.strftime('%m-%d-%Y'),
+            'deathday': None if not self.deathday else self.deathday.strftime('%m-%d-%Y'),
+            'links': { 
+                'self': { 
+                    'href': 'http://' + request.host + '/actors/' + str(self.id)
+                }, 
+                'previous': { 
+                    'href': None if not prev_actor else 'http://' + request.host + '/actors/' + str(prev_actor.id)
+                },
+                'next': { 
+                    'href': None if not next_actor else 'http://' + request.host + '/actors/' + str(next_actor.id)
+                } 
+            }, 
+            'shows': list(map(lambda n: n.name, self.shows))
         }
 
     @staticmethod
@@ -68,6 +91,18 @@ class Actor(db.Model):
     @classmethod
     def find_by_actorid(cls, _userid: int) -> "Actor":
         return cls.query.filter_by(actor_id=_userid).first()
+    
+    @classmethod
+    def find_by_id(cls, _id: int) -> "Actor":
+        return cls.query.filter_by(id=_id).first()
+    
+    @classmethod
+    def get_prev_id(cls, _id: int) -> "Actor":
+        return cls.query.order_by(cls.id.desc()).filter(cls.id < _id).first()
+    
+    @classmethod
+    def get_next_id(cls, _id: int) -> "Actor":
+        return cls.query.order_by(cls.id.asc()).filter(cls.id > _id).first()
     
     def save_to_db(self) -> None:
         # prevent duplicate entries
