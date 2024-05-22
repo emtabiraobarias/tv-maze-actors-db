@@ -29,7 +29,7 @@ A sqlite db named *tv-maze-actors.db* will be created under the `instance` direc
 
 [x] Delete an actor
 
-[] Update an actor
+[x] Update an actor
 
 [] Retrieve list of available actors
 
