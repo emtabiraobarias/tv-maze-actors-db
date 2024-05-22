@@ -14,7 +14,7 @@ class Actors(Resource):
     
     @ns_actor.doc("Add an actor to database.")
     @ns_actor.expect(actor_create_payload)
-    @ns_actor.response(201, 'Report created')
+    @ns_actor.response(201, 'Actor created')
     @ns_actor.response(404, 'Actor not found')
     @ns_actor.response(400, 'Actor cannot be added')
     def post(self):
@@ -49,3 +49,18 @@ class SingleActor(Resource):
         # get next actor
         next_actor = Actor.get_next_id(id)
         return actor.get_json(prev_actor=prev_actor, next_actor=next_actor), 200
+    
+
+    @ns_actor.response(200, 'Actor deleted')
+    @ns_actor.response(404, 'Actor does not exist')
+    @ns_actor.response(304, 'Unable to delete Actor')
+    def delete(self, id):
+        actor = Actor.find_by_id(id)
+        if actor is None:
+            return 'Actor {} does not exist.'.format(id), 404
+
+        try:
+            actor.delete_from_db()
+            return actor.deleted_json(id=id), 200
+        except Exception as msg:
+            return "Actor {0} cannot be deleted. Reason: {1}".format(id, msg), 304
