@@ -75,6 +75,12 @@ class Actor(db.Model):
             }, 
             'shows': list(map(lambda n: n.name, self.shows))
         }
+    
+    def deleted_json(self, id):
+        return { 
+            'message': 'The actor with id {} was removed from the database!'.format(id),
+            'id' : id
+        }
 
     @staticmethod
     def from_json(json_dict):
@@ -113,5 +119,15 @@ class Actor(db.Model):
         except Exception as msg:
             db.session.rollback()
             print("ERROR saving actor entity: " + str(msg))
+
+    def delete_from_db(self) -> None:
+        try:
+            db.session.delete(self)
+            db.session.commit()
+            db.session.flush()
+        except Exception as msg:
+            db.session.rollback()
+            print("ERROR deleting actor entity: " + str(msg))
+            raise Exception(str(msg))
 
     

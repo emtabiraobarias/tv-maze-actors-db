@@ -1,12 +1,19 @@
+import datetime as dt
 from flask_restx import Resource, Namespace
 from helper import TVMaze_API_Access
-from model import Actor
+from model import Actor, Show
 
 ns_actor = Namespace('Actors', description='actor related operations')
 
 ### payloads
 actor_create_payload = ns_actor.parser()
 actor_create_payload.add_argument('name', type=str, location='args', help='actor name')
+
+actor_patch_payload = ns_actor.parser()
+actor_patch_payload.add_argument('name', type=str, location='args', help='actor name')
+actor_patch_payload.add_argument('country', type=str, location='args', help='actor birth country')
+actor_patch_payload.add_argument('birthday', type=str, location='args', help='actor birth date')
+actor_patch_payload.add_argument('deathday', type=str, location='args', help='actor death date')
 ### payloads
 
 @ns_actor.route('/')
@@ -14,7 +21,7 @@ class Actors(Resource):
     
     @ns_actor.doc("Add an actor to database.")
     @ns_actor.expect(actor_create_payload)
-    @ns_actor.response(201, 'Report created')
+    @ns_actor.response(201, 'Actor created')
     @ns_actor.response(404, 'Actor not found')
     @ns_actor.response(400, 'Actor cannot be added')
     def post(self):
@@ -49,3 +56,67 @@ class SingleActor(Resource):
         # get next actor
         next_actor = Actor.get_next_id(id)
         return actor.get_json(prev_actor=prev_actor, next_actor=next_actor), 200
+    
+
+    @ns_actor.response(200, 'Actor deleted')
+    @ns_actor.response(404, 'Actor does not exist')
+    @ns_actor.response(304, 'Unable to delete Actor')
+    def delete(self, id):
+        actor = Actor.find_by_id(id)
+        if actor is None:
+            return 'Actor {} does not exist.'.format(id), 404
+
+        try:
+            actor.delete_from_db()
+            return actor.deleted_json(id=id), 200
+        except Exception as msg:
+            return "Actor {0} cannot be deleted. Reason: {1}".format(id, msg), 304
+        
+    
+    @ns_actor.expect(actor_patch_payload)
+    @ns_actor.response(200, 'Actor updated')
+    @ns_actor.response(404, 'Actor does not exist')
+    @ns_actor.response(304, 'Unable to update Actor')
+    def patch(self, id):
+        actor = Actor.find_by_id(id)
+        if actor is None:
+            return 'Actor {} does not exist.'.format(id), 404
+
+        try:
+            actor_payload = actor_patch_payload.parse_args()
+            # update all properties for future flexibility
+            name = country = deathday = birthday = shows = gender = None
+            for key in actor_payload.keys():
+                if key == 'name':
+                    name = actor_payload[key]
+                elif key == 'country':
+                    country = actor_payload[key]
+                elif key == 'gender':
+                    gender = actor_payload[key]
+                elif key == 'deathday':
+                    deathday = actor_payload[key]
+                elif key == 'birthday':
+                    birthday = actor_payload[key]
+                elif key == 'shows':
+                    shows = actor_payload[key]
+                    
+            actor.name = actor.name if name is None else name
+            actor.country = actor.country if country is None else country
+            actor.gender = actor.gender if gender is None else gender
+            actor.deathday = actor.deathday if deathday is None else dt.datetime.strptime(deathday, "%d-%m-%Y").date()
+            actor.birthday = actor.birthday if birthday is None else dt.datetime.strptime(birthday, "%d-%m-%Y").date()
+            
+            if not shows is None:
+                show_entities = []
+                for show_name in shows:
+                    existing_show = Show.find_by_showname(show_name)
+                    if existing_show is None:
+                        show_entities.append(Show(name = show_name))
+                    else:
+                        show_entities.append(existing_show)
+            actor.shows = actor.shows if shows is None else show_entities
+            actor.last_update = dt.datetime.now()
+            actor.save_to_db()
+            return actor.created_json(), 200
+        except Exception as msg:
+            return 'There was an error in processing. Item was not updated due to: {}.'.format(msg), 304
