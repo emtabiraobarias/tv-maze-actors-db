@@ -1,5 +1,7 @@
 import requests
+import json
 from model import Actor, Show
+from typing import List
 
 class TVMaze_API_Access:
     def __init__(self, url):
@@ -35,3 +37,4 @@ class TVMaze_API_Access:
             return actor
         else: 
             return None
+        

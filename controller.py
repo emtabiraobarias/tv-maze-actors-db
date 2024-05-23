@@ -2,6 +2,7 @@ import datetime as dt
 from flask_restx import Resource, Namespace
 from helper import TVMaze_API_Access
 from model import Actor, Show
+from flask import request
 
 ns_actor = Namespace('Actors', description='actor related operations')
 
@@ -14,11 +15,47 @@ actor_patch_payload.add_argument('name', type=str, location='args', help='actor 
 actor_patch_payload.add_argument('country', type=str, location='args', help='actor birth country')
 actor_patch_payload.add_argument('birthday', type=str, location='args', help='actor birth date')
 actor_patch_payload.add_argument('deathday', type=str, location='args', help='actor death date')
+
+actors_get_payload = ns_actor.parser()
+actors_get_payload.add_argument('order', type=str, location='args', help='sorting method')
+actors_get_payload.add_argument('page', type=int, location='args', help='page to display')
+actors_get_payload.add_argument('size', type=int, location='args', help='size of page')
+actors_get_payload.add_argument('filter', type=str, location='args', help='actor attributes to display')
 ### payloads
 
 @ns_actor.route('/')
 class Actors(Resource):
     
+    @ns_actor.expect(actors_get_payload)
+    @ns_actor.doc("Get list of actors.")
+    @ns_actor.response(404, 'No actors in the database')
+    @ns_actor.response(400, 'Error retrieving actors from the database')
+    def get(self):
+        try:
+            args = actors_get_payload.parse_args()
+            page = 1 if args['page'] is None else args['page']
+            size = 10 if args['size'] is None else args['size']
+            filter = 'id,name' if args['filter'] is None else args['filter']
+            order = '+id' if args['order'] is None else args['order']
+            start = size * (page - 1)
+            stop = page * size
+            total_actors = len(Actor.get_all())
+            if total_actors > 0:
+                actors = Actor.filter_and_sort_columns_with_pagination(order, filter, start, stop)
+                return Actor.actor_list_json(
+                    actors, 
+                    page, 
+                    size, 
+                    stop, 
+                    total_actors, 
+                    order, 
+                    filter), 200
+            else:
+                return 'There are no actors in the database.', 404
+        except Exception as msg:
+            return 'There was an error in retrieving actors list: {}.'.format(msg), 400
+
+
     @ns_actor.doc("Add an actor to database.")
     @ns_actor.expect(actor_create_payload)
     @ns_actor.response(201, 'Actor created')

@@ -16,6 +16,12 @@ class Show(db.Model):
     def __init__(self, name):
         self.name = name
 
+    def json(self):
+        return {
+            'id': self.id,
+            'name': self.name
+        }
+
     @classmethod
     def find_by_showname(cls, _show_name: str) -> "Show":
         return cls.query.filter_by(name = _show_name).first()
@@ -41,7 +47,18 @@ class Actor(db.Model):
         self.last_update = dt.datetime.now()
         self.birthday = birthday
         self.deathday = deathday
-        
+    
+    def json(self):
+        return {
+            'id': self.actor_id,
+            'name': self.name, 
+            'country': self.country,
+            'gender': self.gender,
+            'last_update': str(self.last_update),
+            'birthday': str(self.birthday),
+            'deathday': str(self.deathday)
+        }
+
     def created_json(self):
         return {
             'id': self.id, 
@@ -75,7 +92,7 @@ class Actor(db.Model):
             }, 
             'shows': list(map(lambda n: n.name, self.shows))
         }
-    
+
     def deleted_json(self, id):
         return { 
             'message': 'The actor with id {} was removed from the database!'.format(id),
@@ -94,6 +111,36 @@ class Actor(db.Model):
             deathday = None if not json_dict['deathday'] else dt.datetime.strptime(json_dict['deathday'], "%Y-%m-%d").date()
         )
     
+    @staticmethod
+    def actor_list_json(actors: List,
+                    page: int, 
+                    size: int, 
+                    stop: int, 
+                    total_actors: int, 
+                    order: str, 
+                    filter: str,
+        ):
+        actors_list = [] 
+        for actor in actors:
+            actor_dict = actor._asdict()
+            #for some reason the Actor object is being passed, so have to remove it for JSON to deserialise
+            del actor_dict['Actor'] 
+            actors_list.append(actor_dict)
+        print(actors_list)
+        return {
+            'page': page,
+            'page-size': size,
+            'actors': actors_list,
+            '_links': {
+                'self': {
+                    'href': 'http://' + request.host + '/actors?order={}&page={}&size={}&filter={}'.format(order,page,size,filter)
+                },
+                'next': {
+                    'href': None if not stop < total_actors else 'http://' + request.host + '/actors?order={}&page={}&size={}&filter={}'.format(order,page+1,size,filter)
+                }
+            }
+        }
+    
     @classmethod
     def find_by_actorid(cls, _userid: int) -> "Actor":
         return cls.query.filter_by(actor_id=_userid).first()
@@ -109,6 +156,25 @@ class Actor(db.Model):
     @classmethod
     def get_next_id(cls, _id: int) -> "Actor":
         return cls.query.order_by(cls.id.asc()).filter(cls.id > _id).first()
+    
+    @classmethod
+    def get_all(cls) -> List["Actor"]:
+        return cls.query.all()
+    
+    @classmethod
+    def filter_and_sort_columns_with_pagination(cls, _sort: str, _select: str, _start: int, _stop: int) -> List["Actor"]:
+        query = db.session.query(Actor)
+        select_columns = _select.split(',')
+        for column in select_columns:
+            query = query.add_columns(db.Column(column))
+        sort_columns = _sort.split(',')
+        for clause in sort_columns:
+            isDescending = clause[0] == '-' # ascending by default is nothing was specified
+            column = clause[1:]
+            sort = db.desc(column) if isDescending else db.asc(column)
+            query = query.order_by(sort)
+        query = query.slice(_start, _stop) # apply pagination, stop is exclusive
+        return query.all()
     
     def save_to_db(self) -> None:
         # prevent duplicate entries
