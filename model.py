@@ -1,4 +1,5 @@
 import datetime as dt
+import pandas as pd
 from flask import request
 from db import db
 from typing import List
@@ -175,6 +176,10 @@ class Actor(db.Model):
             query = query.order_by(sort)
         query = query.slice(_start, _stop) # apply pagination, stop is exclusive
         return query.all()
+    
+    @classmethod
+    def count_by_last_updated(cls, _timedelta:int) -> int:
+        return cls.query.filter(cls.last_update > _timedelta).count()
     
     def save_to_db(self) -> None:
         # prevent duplicate entries
