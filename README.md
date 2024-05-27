@@ -22,7 +22,7 @@ python app.py
 ```
 A sqlite db named *tv-maze-actors.db* will be created under the `instance` direcotry. This will also run the web service on port 5000.
 
-## TODO checklist
+## Feature checklist
 [x] Add a new actor
 
 [x] Retrieve an actor
@@ -31,6 +31,6 @@ A sqlite db named *tv-maze-actors.db* will be created under the `instance` direc
 
 [x] Update an actor
 
-[] Retrieve list of available actors
+[x] Retrieve list of available actors
 
-[] Get statistics of existing actors
+[x] Get statistics of existing actors
