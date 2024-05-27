@@ -14,14 +14,13 @@ pipenv shell
 # install all the dependencies found in Pipfile
 pipenv install
 
-# navigate inside app folder and run the flask-restx application
-cd app
+# run the flask-restx application
 python app.py
 
 # You can get the DB API resource endpoints and schema payloads through Swagger-UI
 # Open the browser and navigate to http://127.0.0.1:5000/
 ```
-A sqlite db named *tv-maze-actors.db* will be created under the `app\instance` directory. This will also run the web service on port 5000.
+A sqlite db named *tv-maze-actors.db* will be created under the `instance` directory. This will also run the web service on port 5000.
 
 ## Feature checklist
 [x] Add a new actor
@@ -35,3 +34,10 @@ A sqlite db named *tv-maze-actors.db* will be created under the `app\instance` d
 [x] Retrieve list of available actors
 
 [x] Get statistics of existing actors
+
+
+## Testing instructions
+TBA
+```
+pytest --cov=test  
+```

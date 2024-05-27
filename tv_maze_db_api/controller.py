@@ -2,8 +2,8 @@ import datetime as dt
 import pandas as pd
 from flask import Response
 from flask_restx import Resource, Namespace
-from helper import TVMaze_API_Access, Statistics_Helper
-from model import Actor, Show
+from .helper import TVMaze_API_Access, Statistics_Helper
+from .model import Actor, Show
 
 ns_actor = Namespace('Actors', description='actor related operations')
 

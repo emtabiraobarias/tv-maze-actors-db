@@ -1,7 +1,6 @@
 import datetime as dt
-import pandas as pd
 from flask import request
-from db import db
+from .db import db
 from typing import List
 
 show_actor_association_table = db.Table('show_actor_association', db.Model.metadata,
