@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, jsonify
+from flask import Flask
 from flask_restx import Api
 from db import db
 from controller import ns_actor
