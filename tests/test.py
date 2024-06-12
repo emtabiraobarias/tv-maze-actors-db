@@ -1,6 +1,7 @@
 # reference: https://www.linkedin.com/pulse/unit-testing-flask-application-gitau-harrison/
 import os
 import datetime as dt
+import json
 os.environ['DATABASE_URL'] = 'sqlite:///test.db'
 
 from tv_maze_db_api import app, db, api, controller, model
@@ -35,15 +36,27 @@ class TestDatabaseFeatures(unittest.TestCase):
         response = self.client.post('/actors/?name=Brad Pitt', follow_redirects=True)
         assert response.status_code == 201
         html = response.get_data(as_text=True)
-        assert '"id": 1' in html
-        assert '"last-update": "', dt.datetime.now().strftime('%Y-%m-%d') in html
-        assert '"_links": {"self": {"href": "http://localhost/db/actors/1"}}}' in html
+        jsonresp = json.loads(html)
+        assert jsonresp["id"] == 1
+        assert jsonresp["last-update"].startswith(dt.datetime.now().strftime('%Y-%m-%d'))
+        assert jsonresp["last-update"]["self"]["href"] == "http://localhost/db/actors/1"
 
     def test_should_not_add_nonexistent_actor(self):
         response = self.client.post('/actors/?name=Bard Pitt', follow_redirects=True)
         assert response.status_code == 404
         html = response.get_data(as_text=True)
         assert 'Actor Bard Pitt cannot be found.' in html
+
+    """ def test_should_retrieve_existing_actor(self):
+        response = self.client.get('/actors/1', follow_redirects=True)
+        assert response.status_code == 200
+        html = response.get_data(as_text=True) """
+
+    def test_should_not_retrieve_nonexisting_actor(self):
+        response = self.client.get('/actors/2', follow_redirects=True)
+        assert response.status_code == 404
+        html = response.get_data(as_text=True)
+        assert 'Actor 2 does not exist.' in html
         
 
 
