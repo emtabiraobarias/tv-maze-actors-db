@@ -11,4 +11,3 @@ with app.app_context():
     api = Api(app)
     api.add_namespace(ns_actor, path='/actors')
     db.create_all()
- 
