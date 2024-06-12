@@ -39,7 +39,11 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert '"last-update": "', dt.datetime.now().strftime('%Y-%m-%d') in html
         assert '"_links": {"self": {"href": "http://localhost/db/actors/1"}}}' in html
 
-    
+    def test_should_not_add_nonexistent_actor(self):
+        response = self.client.post('/actors/?name=Bard Pitt', follow_redirects=True)
+        assert response.status_code == 404
+        html = response.get_data(as_text=True)
+        assert 'Actor Bard Pitt cannot be found.' in html
         
 
 
