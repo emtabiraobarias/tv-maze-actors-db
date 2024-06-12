@@ -32,14 +32,14 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert response.status_code == 200
 
     def test_should_add_actor(self):
-        response = self.client.post('/actors/?name=Brad Pitt', data={
-            'name': 'Brad Pitt'
-        }, follow_redirects=True)
+        response = self.client.post('/actors/?name=Brad Pitt', follow_redirects=True)
         assert response.status_code == 201
         html = response.get_data(as_text=True)
         assert '"id": 1' in html
         assert '"last-update": "', dt.datetime.now().strftime('%Y-%m-%d') in html
         assert '"_links": {"self": {"href": "http://localhost/db/actors/1"}}}' in html
+
+    
         
 
 
