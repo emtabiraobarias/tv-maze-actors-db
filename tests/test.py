@@ -1,6 +1,6 @@
 # reference: https://www.linkedin.com/pulse/unit-testing-flask-application-gitau-harrison/
 import os
-#basedir = os.path.abspath(os.path.dirname(__file__))
+import datetime as dt
 os.environ['DATABASE_URL'] = 'sqlite:///test.db'
 
 from tv_maze_db_api import app, db, api, controller, model
@@ -38,8 +38,10 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert response.status_code == 201
         html = response.get_data(as_text=True)
         assert '"id": 1' in html
-        assert '"href": "http://localhost/db/actors/1"' in html
+        assert '"last-update": "', dt.datetime.now().strftime('%Y-%m-%d') in html
+        assert '"_links": {"self": {"href": "http://localhost/db/actors/1"}}}' in html
         
+
 
 if __name__ == '__main__':
     print('I was in test')
