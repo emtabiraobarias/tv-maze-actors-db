@@ -77,8 +77,8 @@ class Actor(db.Model):
             'name': self.name,
             'country': None if not self.country else self.country,
             'gender': None if not self.gender else self.gender,
-            'birthday': None if not self.birthday else self.birthday.strftime('%m-%d-%Y'),
-            'deathday': None if not self.deathday else self.deathday.strftime('%m-%d-%Y'),
+            'birthday': None if not self.birthday else self.birthday.strftime('%d-%m-%Y'),
+            'deathday': None if not self.deathday else self.deathday.strftime('%d-%m-%Y'),
             '_links': { 
                 'self': { 
                     'href': 'http://' + request.host + '/actors/' + str(self.id)

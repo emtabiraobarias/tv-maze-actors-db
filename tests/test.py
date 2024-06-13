@@ -103,6 +103,47 @@ class TestDatabaseFeatures(unittest.TestCase):
         html = response.get_data(as_text=True)
         assert 'Actor 5 does not exist.' in html
 
+    def test_should_update_existing_actor(self):
+        response = self.client.patch('/actors/1?name=Some One&country=Australia&birthday=22-05-1987', 
+            data={
+                "name": "Some One",
+                "country": "Australia",
+                "birthday": "22-05-1987",
+                "deathday": "",
+            }
+            , follow_redirects=True)
+        assert response.status_code == 200
+        html = response.get_data(as_text=True)
+        jsonresp = json.loads(html)
+        assert jsonresp["id"] == 1
+        assert jsonresp["last-update"].startswith(dt.datetime.now().strftime('%Y-%m-%d'))
+        assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors/1"
+
+        response = self.client.get('/actors/1', follow_redirects=True)
+        assert response.status_code == 200
+        html = response.get_data(as_text=True)
+        jsonresp = json.loads(html)
+        assert jsonresp["id"] == 1
+        assert jsonresp["name"] == "Some One"
+        assert jsonresp["country"] == "Australia"
+        assert jsonresp["birthday"] == "22-05-1987"
+        assert jsonresp["last-update"].startswith(dt.datetime.now().strftime('%Y-%m-%d'))
+        assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors/1"
+
+    def test_should_not_update_nonexisting_actor(self):
+        response = self.client.get('/actors/2', 
+            data={
+                "name": "Some One",
+                "country": "Australia",
+                "birthday": "22-05-1987",
+                "deathday": "",
+            }, follow_redirects=True)
+        assert response.status_code == 404
+        html = response.get_data(as_text=True)
+        assert 'Actor 2 does not exist.' in html
+
+    
+
 
 if __name__ == '__main__':
     print('I was in test')
