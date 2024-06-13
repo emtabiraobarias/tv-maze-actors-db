@@ -37,7 +37,8 @@ A sqlite db named *tv-maze-actors.db* will be created under the `instance` direc
 
 
 ## Testing instructions
-TBA
+Navigate to tests directory and execute pytest on test.py file.
 ```
-pytest --cov=test  
+cd tests
+pytest test.py  
 ```
