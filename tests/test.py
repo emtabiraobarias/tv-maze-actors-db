@@ -118,13 +118,28 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors?order=+id&page=1&size=2&filter=id,name"
         assert jsonresp["_links"]["next"]["href"] == None
 
+    def test_should_retrieve_list_of_existing_actors(self):
+        response = self.client.get('/actors/statistics?format=json&by=country,gender', follow_redirects=True)
+        assert response.status_code == 200
+        html = response.get_data(as_text=True)
+        jsonresp = json.loads(html)
+        assert jsonresp["total"] == 2
+        assert jsonresp["total-updated"] == 2
+        assert jsonresp["by-country"] == { "United Kingdom": 50, "United States": 50 }
+        assert jsonresp["by-gender"] == { "Male": 50, "Female": 50 }
+
+        response = self.client.get('/actors/statistics?format=image&by=country,gender', follow_redirects=True)
+        assert response.status_code == 200
+        ctype = response.headers.get("Content-Type")
+        assert ctype == "image/png"
+
     def test_should_update_existing_actor(self):
         response = self.client.patch('/actors/1?name=Some One&country=Australia&birthday=22-05-1987', 
             data={
                 "name": "Some One",
                 "country": "Australia",
                 "birthday": "22-05-1987",
-                "deathday": "",
+                "deathday": None,
             }
             , follow_redirects=True)
         assert response.status_code == 200
