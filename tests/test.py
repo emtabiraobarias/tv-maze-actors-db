@@ -83,7 +83,7 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert response.status_code == 404
         html = response.get_data(as_text=True)
         assert 'Actor 4 does not exist.' in html
-        
+
     def test_should_delete_existing_actor(self):
         response = self.client.delete('/actors/2', follow_redirects=True)
         assert response.status_code == 200
@@ -102,6 +102,21 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert response.status_code == 404
         html = response.get_data(as_text=True)
         assert 'Actor 5 does not exist.' in html
+
+    def test_should_retrieve_list_of_existing_actors(self):
+        response = self.client.get('/actors?+id&page=1&size=2&filter=id,name', follow_redirects=True)
+        assert response.status_code == 200
+        html = response.get_data(as_text=True)
+        jsonresp = json.loads(html)
+        assert jsonresp["page"] == 1
+        assert jsonresp["page-size"] == 2
+        assert len(jsonresp["actors"]) == 2
+        assert jsonresp["actors"][0]["id"] == 1
+        assert jsonresp["actors"][0]["name"] == "Brad Pitt"
+        assert jsonresp["actors"][1]["id"] == 3
+        assert jsonresp["actors"][1]["name"] == "Emilia Clarke"
+        assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors?order=+id&page=1&size=2&filter=id,name"
+        assert jsonresp["_links"]["next"]["href"] == None
 
     def test_should_update_existing_actor(self):
         response = self.client.patch('/actors/1?name=Some One&country=Australia&birthday=22-05-1987', 
@@ -131,7 +146,7 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors/1"
 
     def test_should_not_update_nonexisting_actor(self):
-        response = self.client.get('/actors/2', 
+        response = self.client.get('/actors/2?name=Some One&country=Australia&birthday=22-05-1987', 
             data={
                 "name": "Some One",
                 "country": "Australia",
@@ -141,8 +156,6 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert response.status_code == 404
         html = response.get_data(as_text=True)
         assert 'Actor 2 does not exist.' in html
-
-    
 
 
 if __name__ == '__main__':
