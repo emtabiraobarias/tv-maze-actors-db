@@ -20,17 +20,25 @@ python app.py
 # You can get the DB API resource endpoints and schema payloads through Swagger-UI
 # Open the browser and navigate to http://127.0.0.1:5000/
 ```
-A sqlite db named *tv-maze-actors.db* will be created under the `instance` direcotry. This will also run the web service on port 5000.
+A sqlite db named *tv-maze-actors.db* will be created under the `instance` directory. This will also run the web service on port 5000.
 
 ## Feature checklist
-[x] Add a new actor
+[x] Add a new actor [x] Unit test
 
-[x] Retrieve an actor
+[x] Retrieve an actor [x] Unit test
 
-[x] Delete an actor
+[x] Delete an actor [x] Unit test
 
-[x] Update an actor
+[x] Update an actor [x] Unit test
 
-[x] Retrieve list of available actors
+[x] Retrieve list of available actors [x] Unit test
 
-[x] Get statistics of existing actors
+[x] Get statistics of existing actors [x] Unit test
+
+
+## Testing instructions
+Navigate to tests directory and execute pytest on test.py file.
+```
+cd tests
+pytest test.py  
+```

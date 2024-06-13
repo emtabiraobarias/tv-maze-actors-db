@@ -9,6 +9,8 @@ flask-sqlalchemy = "*"
 requests = "*"
 pandas = "*"
 matplotlib = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [dev-packages]
 

@@ -1,7 +1,6 @@
 import datetime as dt
-import pandas as pd
 from flask import request
-from db import db
+from .db import db
 from typing import List
 
 show_actor_association_table = db.Table('show_actor_association', db.Model.metadata,
@@ -66,7 +65,7 @@ class Actor(db.Model):
             'last-update': str(self.last_update), 
             '_links': { 
                 'self': { 
-                    'href': 'http://' + request.host + '/db/actors/' + str(self.id)
+                    'href': 'http://' + request.host + '/actors/' + str(self.id)
                 } 
             }
         }
@@ -74,13 +73,13 @@ class Actor(db.Model):
     def get_json(self, prev_actor, next_actor):
         return {
             'id': self.id, 
-            'last_update':self.last_update.strftime('%m-%d-%Y %H:%M:%S'), 
+            'last-update':self.last_update.strftime('%Y-%m-%d %H:%M:%S'), 
             'name': self.name,
             'country': None if not self.country else self.country,
             'gender': None if not self.gender else self.gender,
-            'birthday': None if not self.birthday else self.birthday.strftime('%m-%d-%Y'),
-            'deathday': None if not self.deathday else self.deathday.strftime('%m-%d-%Y'),
-            'links': { 
+            'birthday': None if not self.birthday else self.birthday.strftime('%d-%m-%Y'),
+            'deathday': None if not self.deathday else self.deathday.strftime('%d-%m-%Y'),
+            '_links': { 
                 'self': { 
                     'href': 'http://' + request.host + '/actors/' + str(self.id)
                 }, 

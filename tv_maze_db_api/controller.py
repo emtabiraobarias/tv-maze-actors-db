@@ -2,8 +2,8 @@ import datetime as dt
 import pandas as pd
 from flask import Response
 from flask_restx import Resource, Namespace
-from helper import TVMaze_API_Access, Statistics_Helper
-from model import Actor, Show
+from .helper import TVMaze_API_Access, Statistics_Helper
+from .model import Actor, Show
 
 ns_actor = Namespace('Actors', description='actor related operations')
 
@@ -75,7 +75,7 @@ class Actors(Resource):
             api_access = TVMaze_API_Access('https://api.tvmaze.com/search/people?q=')
             actor = api_access.get_actor(arg_name)
         except Exception as msg:
-            return 'There was an error in processing: {}.'.format(msg), 400
+            print('There was an error in processing: {}.'.format(msg))
         if actor is None:
             return 'Actor {} cannot be found.'.format(arg_name), 404
         else:

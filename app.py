@@ -1,14 +1,10 @@
-from flask import Flask, Blueprint, jsonify
+from flask import Flask
 from flask_restx import Api
-from db import db
-from controller import ns_actor
+
+import os
+os.environ['DATABASE_URL'] = 'sqlite:///tv-maze-actors.db'
+
+from tv_maze_db_api import app
 
 if __name__ == '__main__':
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tv-maze-actors.db'
-    db.init_app(app)
-    with app.app_context():
-        api = Api(app)
-        api.add_namespace(ns_actor, path='/actors')
-        db.create_all()
-        app.run(debug=True)
+    app.run(debug=True)
