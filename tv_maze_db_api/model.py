@@ -65,7 +65,7 @@ class Actor(db.Model):
             'last-update': str(self.last_update), 
             '_links': { 
                 'self': { 
-                    'href': 'http://' + request.host + '/db/actors/' + str(self.id)
+                    'href': 'http://' + request.host + '/actors/' + str(self.id)
                 } 
             }
         }
@@ -73,13 +73,13 @@ class Actor(db.Model):
     def get_json(self, prev_actor, next_actor):
         return {
             'id': self.id, 
-            'last_update':self.last_update.strftime('%m-%d-%Y %H:%M:%S'), 
+            'last-update':self.last_update.strftime('%Y-%m-%d %H:%M:%S'), 
             'name': self.name,
             'country': None if not self.country else self.country,
             'gender': None if not self.gender else self.gender,
             'birthday': None if not self.birthday else self.birthday.strftime('%m-%d-%Y'),
             'deathday': None if not self.deathday else self.deathday.strftime('%m-%d-%Y'),
-            'links': { 
+            '_links': { 
                 'self': { 
                     'href': 'http://' + request.host + '/actors/' + str(self.id)
                 }, 
