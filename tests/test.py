@@ -44,6 +44,22 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert jsonresp["last-update"].startswith(dt.datetime.now().strftime('%Y-%m-%d'))
         assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors/1"
 
+        response = self.client.post('/actors/?name=Angelina Jolie', follow_redirects=True)
+        assert response.status_code == 201
+        html = response.get_data(as_text=True)
+        jsonresp = json.loads(html)
+        assert jsonresp["id"] == 2
+        assert jsonresp["last-update"].startswith(dt.datetime.now().strftime('%Y-%m-%d'))
+        assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors/2"
+
+        response = self.client.post('/actors/?name=Emilia Clarke', follow_redirects=True)
+        assert response.status_code == 201
+        html = response.get_data(as_text=True)
+        jsonresp = json.loads(html)
+        assert jsonresp["id"] == 3
+        assert jsonresp["last-update"].startswith(dt.datetime.now().strftime('%Y-%m-%d'))
+        assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors/3"
+
     def test_should_not_add_nonexistent_actor(self):
         response = self.client.post('/actors/?name=Bard Pitt', follow_redirects=True)
         assert response.status_code == 404
@@ -63,11 +79,29 @@ class TestDatabaseFeatures(unittest.TestCase):
         assert jsonresp["_links"]["self"]["href"] == "http://localhost/actors/1"
 
     def test_should_not_retrieve_nonexisting_actor(self):
+        response = self.client.get('/actors/4', follow_redirects=True)
+        assert response.status_code == 404
+        html = response.get_data(as_text=True)
+        assert 'Actor 4 does not exist.' in html
+        
+    def test_should_delete_existing_actor(self):
+        response = self.client.delete('/actors/2', follow_redirects=True)
+        assert response.status_code == 200
+        html = response.get_data(as_text=True)
+        jsonresp = json.loads(html)
+        assert jsonresp["id"] == 2
+        assert jsonresp["message"] == "The actor with id 2 was removed from the database!"
+
+    def test_should_not_delete_nonexisting_actor(self):
         response = self.client.get('/actors/2', follow_redirects=True)
         assert response.status_code == 404
         html = response.get_data(as_text=True)
         assert 'Actor 2 does not exist.' in html
-        
+
+        response = self.client.get('/actors/5', follow_redirects=True)
+        assert response.status_code == 404
+        html = response.get_data(as_text=True)
+        assert 'Actor 5 does not exist.' in html
 
 
 if __name__ == '__main__':
